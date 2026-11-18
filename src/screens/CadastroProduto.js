@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -10,18 +10,8 @@ import {
   StyleSheet,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import {
-  collection,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  doc,
-  onSnapshot,
-  orderBy,
-  query,
-  serverTimestamp,
-} from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { api } from '../services/api';
+import useApi from '../hooks/useApi';
 import Campo from '../components/Campo';
 import Botao from '../components/Botao';
 import Chip from '../components/Chip';
@@ -41,28 +31,11 @@ const formularioVazio = {
 
 export default function CadastroProduto() {
   const rolagem = useRef(null);
-  const [produtos, setProdutos] = useState([]);
+  const { dados: produtos, carregando, recarregar } = useApi('/produtos');
   const [form, setForm] = useState(formularioVazio);
   const [editandoId, setEditandoId] = useState(null);
   const [busca, setBusca] = useState('');
   const [salvando, setSalvando] = useState(false);
-  const [carregando, setCarregando] = useState(true);
-
-  useEffect(() => {
-    const consulta = query(collection(db, 'produtos'), orderBy('nome'));
-    const cancelar = onSnapshot(
-      consulta,
-      (snap) => {
-        setProdutos(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
-        setCarregando(false);
-      },
-      (e) => {
-        setCarregando(false);
-        avisar('Erro', mensagemErro(e));
-      }
-    );
-    return cancelar;
-  }, []);
 
   const filtrados = useMemo(() => {
     const termo = busca.trim().toLowerCase();
@@ -109,13 +82,14 @@ export default function CadastroProduto() {
     setSalvando(true);
     try {
       if (editandoId) {
-        await updateDoc(doc(db, 'produtos', editandoId), { ...dados, atualizadoEm: serverTimestamp() });
+        await api(`/produtos/${editandoId}`, { metodo: 'PUT', corpo: dados });
         avisar('Pronto', 'Produto atualizado.');
       } else {
-        await addDoc(collection(db, 'produtos'), { ...dados, criadoEm: serverTimestamp() });
+        await api('/produtos', { metodo: 'POST', corpo: dados });
         avisar('Pronto', 'Produto cadastrado.');
       }
       limpar();
+      recarregar();
     } catch (e) {
       avisar('Erro', mensagemErro(e));
     } finally {
@@ -141,8 +115,9 @@ export default function CadastroProduto() {
       `Deseja excluir "${produto.nome}"?`,
       async () => {
         try {
-          await deleteDoc(doc(db, 'produtos', produto.id));
+          await api(`/produtos/${produto.id}`, { metodo: 'DELETE' });
           if (editandoId === produto.id) limpar();
+          recarregar();
         } catch (e) {
           avisar('Erro', mensagemErro(e));
         }

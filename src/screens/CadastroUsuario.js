@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
 import { View, Text, KeyboardAvoidingView, ScrollView, Platform, StyleSheet } from 'react-native';
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { auth, db } from '../config/firebase';
+import { useAuth } from '../context/AuthContext';
 import Logo from '../components/Logo';
 import Campo from '../components/Campo';
 import Botao from '../components/Botao';
 import { cores, fontes } from '../theme/cores';
-import { mensagemErro, telefone as mascaraTelefone } from '../utils/formatar';
+import { telefone as mascaraTelefone } from '../utils/formatar';
 
 export default function CadastroUsuario() {
+  const { cadastrar: criarConta } = useAuth();
   const [nome, setNome] = useState('');
   const [telefone, setTelefone] = useState('');
   const [email, setEmail] = useState('');
@@ -35,16 +34,9 @@ export default function CadastroUsuario() {
 
     setCarregando(true);
     try {
-      const credencial = await createUserWithEmailAndPassword(auth, email.trim(), senha);
-      await updateProfile(credencial.user, { displayName: nome.trim() });
-      await setDoc(doc(db, 'usuarios', credencial.user.uid), {
-        nome: nome.trim(),
-        telefone,
-        email: email.trim().toLowerCase(),
-        criadoEm: serverTimestamp(),
-      });
+      await criarConta({ nome: nome.trim(), telefone, email: email.trim(), senha });
     } catch (e) {
-      setErro(mensagemErro(e));
+      setErro(e.message);
       setCarregando(false);
     }
   }

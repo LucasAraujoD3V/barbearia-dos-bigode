@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -9,9 +9,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { doc, onSnapshot, collection, query, where } from 'firebase/firestore';
-import { db } from '../config/firebase';
 import { useAuth } from '../context/AuthContext';
+import useApi from '../hooks/useApi';
 import { barbearia } from '../data/barbearia';
 import { cores, fontes } from '../theme/cores';
 import { dataISO } from '../utils/formatar';
@@ -39,30 +38,9 @@ function saudacao() {
 
 export default function Menu({ navigation }) {
   const { usuario, sair } = useAuth();
-  const [nome, setNome] = useState(usuario?.displayName || '');
-  const [proximo, setProximo] = useState(null);
-
-  useEffect(() => {
-    if (!usuario) return undefined;
-    const cancelar = onSnapshot(doc(db, 'usuarios', usuario.uid), (snap) => {
-      if (snap.exists() && snap.data().nome) setNome(snap.data().nome);
-    }, () => {});
-    return cancelar;
-  }, [usuario]);
-
-  useEffect(() => {
-    if (!usuario) return undefined;
-    const consulta = query(collection(db, 'agendamentos'), where('usuarioId', '==', usuario.uid));
-    const cancelar = onSnapshot(consulta, (snap) => {
-      const hoje = dataISO(new Date());
-      const futuros = snap.docs
-        .map((d) => ({ id: d.id, ...d.data() }))
-        .filter((a) => a.data >= hoje)
-        .sort((a, b) => `${a.data}${a.hora}`.localeCompare(`${b.data}${b.hora}`));
-      setProximo(futuros[0] || null);
-    }, () => {});
-    return cancelar;
-  }, [usuario]);
+  const { dados: meus } = useApi('/agendamentos/meus');
+  const hoje = dataISO(new Date());
+  const proximo = (meus || []).find((a) => a.data >= hoje) || null;
 
   function confirmarSaida() {
     confirmar('Sair', 'Deseja mesmo sair da sua conta?', sair, 'Sair', true);
@@ -76,7 +54,7 @@ export default function Menu({ navigation }) {
     navigation.navigate(item.destino);
   }
 
-  const primeiroNome = (nome || usuario?.email || '').split(/[ @]/)[0];
+  const primeiroNome = (usuario?.nome || usuario?.email || '').split(/[ @]/)[0];
 
   function textoProximo() {
     const [ano, mes, dia] = proximo.data.split('-').map(Number);

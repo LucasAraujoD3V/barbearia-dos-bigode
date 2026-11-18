@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -11,18 +11,8 @@ import {
   StyleSheet,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import {
-  collection,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  doc,
-  onSnapshot,
-  orderBy,
-  query,
-  serverTimestamp,
-} from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { api } from '../services/api';
+import useApi from '../hooks/useApi';
 import Campo from '../components/Campo';
 import Botao from '../components/Botao';
 import Vazio from '../components/Vazio';
@@ -46,28 +36,11 @@ function iniciais(nome) {
 
 export default function CadastroCliente() {
   const rolagem = useRef(null);
-  const [clientes, setClientes] = useState([]);
+  const { dados: clientes, carregando, recarregar } = useApi('/clientes');
   const [form, setForm] = useState(formularioVazio);
   const [editandoId, setEditandoId] = useState(null);
   const [busca, setBusca] = useState('');
   const [salvando, setSalvando] = useState(false);
-  const [carregando, setCarregando] = useState(true);
-
-  useEffect(() => {
-    const consulta = query(collection(db, 'clientes'), orderBy('nome'));
-    const cancelar = onSnapshot(
-      consulta,
-      (snap) => {
-        setClientes(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
-        setCarregando(false);
-      },
-      (e) => {
-        setCarregando(false);
-        avisar('Erro', mensagemErro(e));
-      }
-    );
-    return cancelar;
-  }, []);
 
   const filtrados = useMemo(() => {
     const termo = busca.trim().toLowerCase();
@@ -113,13 +86,14 @@ export default function CadastroCliente() {
     setSalvando(true);
     try {
       if (editandoId) {
-        await updateDoc(doc(db, 'clientes', editandoId), { ...dados, atualizadoEm: serverTimestamp() });
+        await api(`/clientes/${editandoId}`, { metodo: 'PUT', corpo: dados });
         avisar('Pronto', 'Cliente atualizado.');
       } else {
-        await addDoc(collection(db, 'clientes'), { ...dados, criadoEm: serverTimestamp() });
+        await api('/clientes', { metodo: 'POST', corpo: dados });
         avisar('Pronto', 'Cliente cadastrado.');
       }
       limpar();
+      recarregar();
     } catch (e) {
       avisar('Erro', mensagemErro(e));
     } finally {
@@ -144,8 +118,9 @@ export default function CadastroCliente() {
       `Deseja excluir a ficha de "${cliente.nome}"?`,
       async () => {
         try {
-          await deleteDoc(doc(db, 'clientes', cliente.id));
+          await api(`/clientes/${cliente.id}`, { metodo: 'DELETE' });
           if (editandoId === cliente.id) limpar();
+          recarregar();
         } catch (e) {
           avisar('Erro', mensagemErro(e));
         }

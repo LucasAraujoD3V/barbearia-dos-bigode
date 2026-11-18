@@ -5,27 +5,19 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
+  RefreshControl,
   useWindowDimensions,
   StyleSheet,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import {
-  collection,
-  query,
-  where,
-  onSnapshot,
-  doc,
-  runTransaction,
-  deleteDoc,
-  serverTimestamp,
-} from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import useApi from '../hooks/useApi';
 import useServicos from '../hooks/useServicos';
 import Chip from '../components/Chip';
 import { funcionamento, intervaloMinutos } from '../data/barbearia';
 import { cores, fontes } from '../theme/cores';
-import { dataISO, horaParaMinutos, minutosParaHora, moeda, mensagemErro } from '../utils/formatar';
+import { dataISO, horaParaMinutos, minutosParaHora, moeda } from '../utils/formatar';
 import { avisar, confirmar } from '../utils/dialogo';
 
 const nomesCurtos = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
@@ -74,9 +66,13 @@ export default function Horarios({ route }) {
     () => dias.find((d) => gerarHorarios(d).some((h) => !h.passado)) || dias[0]
   );
   const [servicoId, setServicoId] = useState(route.params?.servicoId || null);
-  const [agendamentos, setAgendamentos] = useState({});
-  const [carregando, setCarregando] = useState(true);
   const [processando, setProcessando] = useState(null);
+  const {
+    dados: lista,
+    carregando,
+    erro,
+    recarregar,
+  } = useApi(`/agendamentos?data=${diaSelecionado.iso}`);
 
   useEffect(() => {
     if (route.params?.servicoId) setServicoId(route.params.servicoId);
@@ -86,26 +82,13 @@ export default function Horarios({ route }) {
     if (!servicoId && servicos.length) setServicoId(servicos[0].id);
   }, [servicos, servicoId]);
 
-  useEffect(() => {
-    setCarregando(true);
-    const consulta = query(collection(db, 'agendamentos'), where('data', '==', diaSelecionado.iso));
-    const cancelar = onSnapshot(
-      consulta,
-      (snap) => {
-        const mapa = {};
-        snap.docs.forEach((d) => {
-          mapa[d.data().hora] = { id: d.id, ...d.data() };
-        });
-        setAgendamentos(mapa);
-        setCarregando(false);
-      },
-      (e) => {
-        setCarregando(false);
-        avisar('Erro', mensagemErro(e));
-      }
-    );
-    return cancelar;
-  }, [diaSelecionado.iso]);
+  const agendamentos = useMemo(() => {
+    const mapa = {};
+    (lista || []).forEach((a) => {
+      mapa[a.hora] = a;
+    });
+    return mapa;
+  }, [lista]);
 
   const horarios = useMemo(() => gerarHorarios(diaSelecionado), [diaSelecionado]);
   const servico = servicos.find((s) => s.id === servicoId);
@@ -120,26 +103,16 @@ export default function Horarios({ route }) {
     const titulo = `${diaSelecionado.semana}, ${diaSelecionado.dia} ${diaSelecionado.mes} às ${hora}`;
     confirmar('Confirmar reserva', `${servico.nome} - ${moeda(servico.preco)}\n${titulo}`, async () => {
       setProcessando(hora);
-      const ref = doc(db, 'agendamentos', `${diaSelecionado.iso}_${hora.replace(':', '')}`);
       try {
-        await runTransaction(db, async (transacao) => {
-          const existente = await transacao.get(ref);
-          if (existente.exists()) throw new Error('Esse horário acabou de ser reservado por outra pessoa.');
-          transacao.set(ref, {
-            data: diaSelecionado.iso,
-            hora,
-            servicoId: servico.id,
-            servico: servico.nome,
-            preco: servico.preco,
-            usuarioId: usuario.uid,
-            cliente: usuario.displayName || usuario.email,
-            criadoEm: serverTimestamp(),
-          });
+        await api('/agendamentos', {
+          metodo: 'POST',
+          corpo: { data: diaSelecionado.iso, hora, servicoId: servico.id },
         });
         avisar('Horário reservado!', `Te esperamos ${titulo}.`);
       } catch (e) {
-        avisar('Não foi possível reservar', mensagemErro(e));
+        avisar('Não foi possível reservar', e.message);
       } finally {
+        await recarregar();
         setProcessando(null);
       }
     });
@@ -152,10 +125,11 @@ export default function Horarios({ route }) {
       async () => {
         setProcessando(agendamento.hora);
         try {
-          await deleteDoc(doc(db, 'agendamentos', agendamento.id));
+          await api(`/agendamentos/${agendamento.id}`, { metodo: 'DELETE' });
         } catch (e) {
-          avisar('Erro', mensagemErro(e));
+          avisar('Erro', e.message);
         } finally {
+          await recarregar();
           setProcessando(null);
         }
       },
@@ -166,7 +140,7 @@ export default function Horarios({ route }) {
 
   function tocarHorario(item) {
     const agendamento = agendamentos[item.hora];
-    if (agendamento?.usuarioId === usuario.uid) {
+    if (agendamento && agendamento.usuario === usuario.id) {
       cancelar(agendamento);
       return;
     }
@@ -175,7 +149,11 @@ export default function Horarios({ route }) {
   }
 
   return (
-    <ScrollView style={mascara.casca} contentContainerStyle={mascara.conteudo}>
+    <ScrollView
+      style={mascara.casca}
+      contentContainerStyle={mascara.conteudo}
+      refreshControl={<RefreshControl refreshing={false} onRefresh={recarregar} tintColor={cores.dourado} />}
+    >
       <View style={mascara.cartao}>
         <View style={mascara.cartaoTopo}>
           <MaterialCommunityIcons name="clock-outline" size={20} color={cores.dourado} />
@@ -238,13 +216,15 @@ export default function Horarios({ route }) {
         <Legenda cor={cores.dourado} borda={cores.dourado} texto="Seu horário" />
       </View>
 
+      {erro ? <Text style={mascara.erro}>{erro}</Text> : null}
+
       {carregando ? (
         <ActivityIndicator color={cores.dourado} style={mascara.indicador} />
       ) : (
         <View style={mascara.grade}>
           {horarios.map((item) => {
             const agendamento = agendamentos[item.hora];
-            const meu = agendamento?.usuarioId === usuario.uid;
+            const meu = !!agendamento && agendamento.usuario === usuario.id;
             const ocupado = !!agendamento && !meu;
             const bloqueado = ocupado || item.passado;
             return (
@@ -463,6 +443,12 @@ const mascara = StyleSheet.create({
   horarioTextoMeu: {
     color: cores.fundo,
     textDecorationLine: 'none',
+  },
+  erro: {
+    color: '#E0786D',
+    fontSize: 13,
+    textAlign: 'center',
+    marginBottom: 12,
   },
   dica: {
     color: cores.textoApagado,

@@ -9,49 +9,31 @@ import {
   StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
-import { auth } from '../config/firebase';
+import { useAuth } from '../context/AuthContext';
 import Logo from '../components/Logo';
 import Campo from '../components/Campo';
 import Botao from '../components/Botao';
 import { cores } from '../theme/cores';
-import { mensagemErro } from '../utils/formatar';
 
 export default function Login({ navigation }) {
+  const { entrar: fazerLogin } = useAuth();
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState('');
-  const [aviso, setAviso] = useState('');
   const [carregando, setCarregando] = useState(false);
 
   async function entrar() {
     setErro('');
-    setAviso('');
     if (!email.trim() || !senha) {
       setErro('Preencha e-mail e senha.');
       return;
     }
     setCarregando(true);
     try {
-      await signInWithEmailAndPassword(auth, email.trim(), senha);
+      await fazerLogin(email.trim(), senha);
     } catch (e) {
-      setErro(mensagemErro(e));
+      setErro(e.message);
       setCarregando(false);
-    }
-  }
-
-  async function esqueciSenha() {
-    setErro('');
-    setAviso('');
-    if (!email.trim()) {
-      setErro('Digite seu e-mail para receber o link de redefinição.');
-      return;
-    }
-    try {
-      await sendPasswordResetEmail(auth, email.trim());
-      setAviso('Enviamos um link de redefinição para o seu e-mail.');
-    } catch (e) {
-      setErro(mensagemErro(e));
     }
   }
 
@@ -85,12 +67,7 @@ export default function Login({ navigation }) {
               onSubmitEditing={entrar}
             />
 
-            <TouchableOpacity onPress={esqueciSenha} style={mascara.esqueci}>
-              <Text style={mascara.link}>Esqueci minha senha</Text>
-            </TouchableOpacity>
-
             {erro ? <Text style={mascara.erro}>{erro}</Text> : null}
-            {aviso ? <Text style={mascara.aviso}>{aviso}</Text> : null}
 
             <Botao titulo="Entrar" icone="login" onPress={entrar} carregando={carregando} />
 
@@ -123,23 +100,8 @@ const mascara = StyleSheet.create({
     maxWidth: 420,
     alignSelf: 'center',
   },
-  esqueci: {
-    alignSelf: 'flex-end',
-    marginBottom: 20,
-    marginTop: -4,
-  },
-  link: {
-    color: cores.textoSecundario,
-    fontSize: 13,
-  },
   erro: {
     color: '#E0786D',
-    fontSize: 14,
-    marginBottom: 14,
-    textAlign: 'center',
-  },
-  aviso: {
-    color: cores.verde,
     fontSize: 14,
     marginBottom: 14,
     textAlign: 'center',

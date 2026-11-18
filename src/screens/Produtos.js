@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import React, { useLayoutEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -9,20 +9,17 @@ import {
   StyleSheet,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import useApi from '../hooks/useApi';
 import Chip from '../components/Chip';
 import Vazio from '../components/Vazio';
 import Botao from '../components/Botao';
 import { categoriasProduto, iconeCategoria } from '../data/barbearia';
 import { cores } from '../theme/cores';
-import { moeda, mensagemErro } from '../utils/formatar';
+import { moeda } from '../utils/formatar';
 
 export default function Produtos({ navigation }) {
-  const [produtos, setProdutos] = useState([]);
+  const { dados: produtos, carregando, erro, recarregar } = useApi('/produtos');
   const [categoria, setCategoria] = useState('Todos');
-  const [carregando, setCarregando] = useState(true);
-  const [erro, setErro] = useState('');
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -37,22 +34,6 @@ export default function Produtos({ navigation }) {
       ),
     });
   }, [navigation]);
-
-  useEffect(() => {
-    const consulta = query(collection(db, 'produtos'), orderBy('nome'));
-    const cancelar = onSnapshot(
-      consulta,
-      (snap) => {
-        setProdutos(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
-        setCarregando(false);
-      },
-      (e) => {
-        setErro(mensagemErro(e));
-        setCarregando(false);
-      }
-    );
-    return cancelar;
-  }, []);
 
   const filtrados = useMemo(() => {
     const lista = categoria === 'Todos' ? produtos : produtos.filter((p) => p.categoria === categoria);
@@ -91,6 +72,8 @@ export default function Produtos({ navigation }) {
         data={filtrados}
         keyExtractor={(item) => item.id}
         numColumns={2}
+        refreshing={false}
+        onRefresh={recarregar}
         columnWrapperStyle={mascara.linha}
         contentContainerStyle={mascara.lista}
         ListEmptyComponent={
