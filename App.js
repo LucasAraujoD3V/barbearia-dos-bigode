@@ -5,9 +5,12 @@ import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import {
   useFonts,
-  PlayfairDisplay_700Bold,
-  PlayfairDisplay_700Bold_Italic,
-} from '@expo-google-fonts/playfair-display';
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+  Inter_800ExtraBold,
+} from '@expo-google-fonts/inter';
 import { AuthProvider } from './src/context/AuthContext';
 import Rotas from './src/navigation/Rotas';
 import { cores } from './src/theme/cores';
@@ -27,8 +30,11 @@ const tema = {
 
 export default function App() {
   const [fontesProntas] = useFonts({
-    PlayfairDisplay_700Bold,
-    PlayfairDisplay_700Bold_Italic,
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
+    Inter_800ExtraBold,
   });
 
   if (!fontesProntas) {

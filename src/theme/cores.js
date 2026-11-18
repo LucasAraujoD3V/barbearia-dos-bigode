@@ -11,8 +11,3 @@ export const cores = {
   vermelho: '#B23A2E',
   verde: '#5E8C61',
 };
-
-export const fontes = {
-  titulo: 'PlayfairDisplay_700Bold',
-  tituloItalico: 'PlayfairDisplay_700Bold_Italic',
-};

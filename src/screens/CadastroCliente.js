@@ -1,7 +1,6 @@
 import React, { useMemo, useRef, useState } from 'react';
 import {
   View,
-  Text,
   ScrollView,
   TouchableOpacity,
   KeyboardAvoidingView,
@@ -10,13 +9,14 @@ import {
   Platform,
   StyleSheet,
 } from 'react-native';
+import Text from '../components/Texto';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { api } from '../services/api';
 import useApi from '../hooks/useApi';
 import Campo from '../components/Campo';
 import Botao from '../components/Botao';
 import Vazio from '../components/Vazio';
-import { cores, fontes } from '../theme/cores';
+import { cores } from '../theme/cores';
 import { telefone as mascaraTelefone, mensagemErro } from '../utils/formatar';
 import { avisar, confirmar } from '../utils/dialogo';
 
@@ -257,7 +257,8 @@ const mascara = StyleSheet.create({
   },
   titulo: {
     color: cores.creme,
-    fontFamily: fontes.titulo,
+    fontWeight: '800',
+    letterSpacing: -0.5,
     fontSize: 22,
     marginBottom: 16,
   },

@@ -1,10 +1,19 @@
 import React, { useState } from 'react';
-import { View, Text, KeyboardAvoidingView, ScrollView, Platform, StyleSheet } from 'react-native';
+import {
+  View,
+  KeyboardAvoidingView,
+  ScrollView,
+  Platform,
+  StyleSheet,
+} from 'react-native';
+import Text from '../components/Texto';
 import { useAuth } from '../context/AuthContext';
 import Logo from '../components/Logo';
+import FundoFoto from '../components/FundoFoto';
+import { fotos } from '../data/fotos';
 import Campo from '../components/Campo';
 import Botao from '../components/Botao';
-import { cores, fontes } from '../theme/cores';
+import { cores } from '../theme/cores';
 import { telefone as mascaraTelefone } from '../utils/formatar';
 
 export default function CadastroUsuario() {
@@ -42,8 +51,13 @@ export default function CadastroUsuario() {
   }
 
   return (
-    <KeyboardAvoidingView
+    <FundoFoto
+      foto={fotos.espelho}
+      degrade={['rgba(20,17,15,0.55)', 'rgba(20,17,15,0.88)', cores.fundo]}
       style={mascara.casca}
+    >
+    <KeyboardAvoidingView
+      style={mascara.livre}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView contentContainerStyle={mascara.conteudo} keyboardShouldPersistTaps="handled">
@@ -87,6 +101,7 @@ export default function CadastroUsuario() {
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
+    </FundoFoto>
   );
 }
 
@@ -95,13 +110,17 @@ const mascara = StyleSheet.create({
     flex: 1,
     backgroundColor: cores.fundo,
   },
+  livre: {
+    flex: 1,
+  },
   conteudo: {
     padding: 24,
     paddingBottom: 48,
   },
   titulo: {
     color: cores.creme,
-    fontFamily: fontes.titulo,
+    fontWeight: '800',
+    letterSpacing: -0.5,
     fontSize: 26,
     textAlign: 'center',
     marginTop: 16,

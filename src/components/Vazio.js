@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import Text from './Texto';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { cores } from '../theme/cores';
 

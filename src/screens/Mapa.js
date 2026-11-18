@@ -1,11 +1,12 @@
 import React from 'react';
-import { View, Text, Linking, StyleSheet } from 'react-native';
+import { View, Linking, StyleSheet } from 'react-native';
+import Text from '../components/Texto';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import MapaBarbearia from '../components/MapaBarbearia';
 import Botao from '../components/Botao';
 import { barbearia, funcionamento } from '../data/barbearia';
-import { cores, fontes } from '../theme/cores';
+import { cores } from '../theme/cores';
 
 export default function Mapa() {
   const hoje = funcionamento[new Date().getDay()];
@@ -85,7 +86,8 @@ const mascara = StyleSheet.create({
   },
   nome: {
     color: cores.creme,
-    fontFamily: fontes.titulo,
+    fontWeight: '800',
+    letterSpacing: -0.5,
     fontSize: 22,
     marginBottom: 14,
   },

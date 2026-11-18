@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import Text from './Texto';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { cores, fontes } from '../theme/cores';
+import { cores } from '../theme/cores';
 
 export default function Logo({ tamanho = 96, mostrarNome = true }) {
   return (
@@ -66,7 +67,8 @@ const mascara = StyleSheet.create({
   nome: {
     color: cores.creme,
     fontSize: 36,
-    fontFamily: fontes.tituloItalico,
+    fontWeight: '800',
+    letterSpacing: -0.5,
     marginTop: -2,
   },
   filete: {

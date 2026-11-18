@@ -1,10 +1,20 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Linking, StyleSheet } from 'react-native';
+import {
+  View,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  Linking,
+  StyleSheet,
+} from 'react-native';
+import Text from '../components/Texto';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Logo from '../components/Logo';
+import FundoFoto from '../components/FundoFoto';
+import { fotos, galeria } from '../data/fotos';
 import Botao from '../components/Botao';
 import { barbearia, equipe, diferenciais, funcionamento } from '../data/barbearia';
-import { cores, fontes } from '../theme/cores';
+import { cores } from '../theme/cores';
 
 const listras = Array.from({ length: 18 }, (_, i) => i);
 
@@ -52,10 +62,14 @@ export default function Loja({ navigation }) {
 
   return (
     <ScrollView style={mascara.casca} contentContainerStyle={mascara.conteudo}>
-      <View style={mascara.hero}>
+      <FundoFoto
+        foto={fotos.salao}
+        degrade={['rgba(20,17,15,0.35)', 'rgba(20,17,15,0.75)', cores.fundo]}
+        style={mascara.hero}
+      >
         <Logo />
         <Text style={mascara.slogan}>{barbearia.slogan}</Text>
-      </View>
+      </FundoFoto>
 
       <Listras />
 
@@ -70,6 +84,13 @@ export default function Loja({ navigation }) {
           </View>
         ))}
       </View>
+
+      <Text style={mascara.secao}>Nosso espaço</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={mascara.galeria}>
+        {galeria.map((foto) => (
+          <Image key={foto} source={{ uri: foto }} style={mascara.galeriaFoto} />
+        ))}
+      </ScrollView>
 
       <Text style={mascara.secao}>A equipe</Text>
       {equipe.map((b) => (
@@ -150,10 +171,25 @@ const mascara = StyleSheet.create({
   },
   hero: {
     alignItems: 'center',
-    paddingVertical: 20,
+    paddingTop: 48,
+    paddingBottom: 28,
+    marginHorizontal: -20,
+    marginTop: -20,
+  },
+  galeria: {
+    flexGrow: 0,
+    marginHorizontal: -20,
+    paddingLeft: 20,
+  },
+  galeriaFoto: {
+    width: 240,
+    height: 160,
+    borderRadius: 16,
+    marginRight: 12,
+    backgroundColor: cores.superficieAlta,
   },
   slogan: {
-    color: cores.textoSecundario,
+    color: '#D8CCB8',
     fontSize: 14,
     fontStyle: 'italic',
     marginTop: 12,
@@ -232,7 +268,8 @@ const mascara = StyleSheet.create({
   },
   barbeiroNome: {
     color: cores.creme,
-    fontFamily: fontes.titulo,
+    fontWeight: '800',
+    letterSpacing: -0.5,
     fontSize: 18,
   },
   barbeiroFuncao: {

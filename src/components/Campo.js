@@ -1,5 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import {
+  View,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+} from 'react-native';
+import Text, { fonte } from './Texto';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { cores } from '../theme/cores';
 
@@ -76,6 +82,7 @@ const mascara = StyleSheet.create({
     marginTop: 2,
   },
   entrada: {
+    ...fonte('400'),
     flex: 1,
     color: cores.creme,
     fontSize: 16,

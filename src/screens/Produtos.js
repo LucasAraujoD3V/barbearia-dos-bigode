@@ -1,13 +1,13 @@
 import React, { useLayoutEffect, useMemo, useState } from 'react';
 import {
   View,
-  Text,
   FlatList,
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
   StyleSheet,
 } from 'react-native';
+import Text from '../components/Texto';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import useApi from '../hooks/useApi';
 import Chip from '../components/Chip';
@@ -140,6 +140,7 @@ const mascara = StyleSheet.create({
   },
   filtros: {
     flexGrow: 0,
+    flexShrink: 0,
   },
   filtrosConteudo: {
     paddingHorizontal: 20,

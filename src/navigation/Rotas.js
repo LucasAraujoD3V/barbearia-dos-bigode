@@ -4,7 +4,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
-import { cores, fontes } from '../theme/cores';
+import { cores } from '../theme/cores';
+import { fonte } from '../components/Texto';
 
 import Login from '../screens/Login';
 import CadastroUsuario from '../screens/CadastroUsuario';
@@ -23,7 +24,7 @@ const Tab = createBottomTabNavigator();
 const cabecalho = {
   headerStyle: { backgroundColor: cores.fundo },
   headerTintColor: cores.dourado,
-  headerTitleStyle: { fontFamily: fontes.titulo, color: cores.creme, fontSize: 20 },
+  headerTitleStyle: { ...fonte('700'), color: cores.creme, fontSize: 18 },
   headerShadowVisible: false,
   headerTitleAlign: 'center',
 };
@@ -48,7 +49,7 @@ function Abas() {
           borderTopColor: cores.borda,
           ...(Platform.OS === 'web' ? { height: 64, paddingBottom: 8 } : null),
         },
-        tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
+        tabBarLabelStyle: { ...fonte('600'), fontSize: 11 },
         tabBarIcon: ({ color, size }) => (
           <MaterialCommunityIcons name={iconesAbas[route.name]} size={size} color={color} />
         ),

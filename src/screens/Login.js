@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import {
   View,
-  Text,
   TouchableOpacity,
   KeyboardAvoidingView,
   ScrollView,
   Platform,
   StyleSheet,
 } from 'react-native';
+import Text from '../components/Texto';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
 import Logo from '../components/Logo';
+import FundoFoto from '../components/FundoFoto';
+import { fotos } from '../data/fotos';
 import Campo from '../components/Campo';
 import Botao from '../components/Botao';
 import { cores } from '../theme/cores';
@@ -38,9 +40,14 @@ export default function Login({ navigation }) {
   }
 
   return (
-    <SafeAreaView style={mascara.casca}>
+    <FundoFoto
+      foto={fotos.salao}
+      degrade={['rgba(20,17,15,0.30)', 'rgba(20,17,15,0.78)', cores.fundo]}
+      style={mascara.casca}
+    >
+    <SafeAreaView style={mascara.livre}>
       <KeyboardAvoidingView
-        style={mascara.casca}
+        style={mascara.livre}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <ScrollView contentContainerStyle={mascara.conteudo} keyboardShouldPersistTaps="handled">
@@ -81,6 +88,7 @@ export default function Login({ navigation }) {
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
+    </FundoFoto>
   );
 }
 
@@ -88,6 +96,9 @@ const mascara = StyleSheet.create({
   casca: {
     flex: 1,
     backgroundColor: cores.fundo,
+  },
+  livre: {
+    flex: 1,
   },
   conteudo: {
     flexGrow: 1,

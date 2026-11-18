@@ -1,9 +1,18 @@
 import React from 'react';
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
+import {
+  View,
+  FlatList,
+  TouchableOpacity,
+  ActivityIndicator,
+  StyleSheet,
+} from 'react-native';
+import Text from '../components/Texto';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import useServicos from '../hooks/useServicos';
 import Vazio from '../components/Vazio';
-import { cores, fontes } from '../theme/cores';
+import FundoFoto from '../components/FundoFoto';
+import { fotos } from '../data/fotos';
+import { cores } from '../theme/cores';
 import { moeda } from '../utils/formatar';
 
 export default function Servicos({ navigation }) {
@@ -24,10 +33,14 @@ export default function Servicos({ navigation }) {
       data={servicos}
       keyExtractor={(item) => item.id}
       ListHeaderComponent={
-        <View style={mascara.cabecalho}>
+        <FundoFoto
+          foto={fotos.barba}
+          degrade={['rgba(20,17,15,0.05)', 'rgba(20,17,15,0.55)', 'rgba(20,17,15,0.95)']}
+          style={mascara.cabecalho}
+        >
           <Text style={mascara.titulo}>Cardápio da casa</Text>
           <Text style={mascara.subtitulo}>Toalha quente e cafezinho em todos os serviços.</Text>
-        </View>
+        </FundoFoto>
       }
       ListEmptyComponent={
         <Vazio icone="content-cut" titulo="Nenhum serviço encontrado" texto={erro || 'Os serviços aparecem aqui.'} />
@@ -82,15 +95,22 @@ const mascara = StyleSheet.create({
     alignSelf: 'center',
   },
   cabecalho: {
+    height: 190,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: cores.borda,
+    padding: 18,
+    justifyContent: 'flex-end',
     marginBottom: 18,
   },
   titulo: {
     color: cores.creme,
-    fontFamily: fontes.tituloItalico,
+    fontWeight: '800',
+    letterSpacing: -0.5,
     fontSize: 26,
   },
   subtitulo: {
-    color: cores.textoSecundario,
+    color: '#D8CCB8',
     fontSize: 14,
     marginTop: 4,
   },

@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   View,
-  Text,
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
@@ -9,14 +8,17 @@ import {
   useWindowDimensions,
   StyleSheet,
 } from 'react-native';
+import Text from '../components/Texto';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import useApi from '../hooks/useApi';
 import useServicos from '../hooks/useServicos';
 import Chip from '../components/Chip';
+import FundoFoto from '../components/FundoFoto';
+import { fotos } from '../data/fotos';
 import { funcionamento, intervaloMinutos } from '../data/barbearia';
-import { cores, fontes } from '../theme/cores';
+import { cores } from '../theme/cores';
 import { dataISO, horaParaMinutos, minutosParaHora, moeda } from '../utils/formatar';
 import { avisar, confirmar } from '../utils/dialogo';
 
@@ -154,6 +156,15 @@ export default function Horarios({ route }) {
       contentContainerStyle={mascara.conteudo}
       refreshControl={<RefreshControl refreshing={false} onRefresh={recarregar} tintColor={cores.dourado} />}
     >
+      <FundoFoto
+        foto={fotos.cadeira}
+        degrade={['rgba(20,17,15,0.05)', 'rgba(20,17,15,0.55)', 'rgba(20,17,15,0.95)']}
+        style={mascara.banner}
+      >
+        <Text style={mascara.bannerTitulo}>Reserve sua cadeira</Text>
+        <Text style={mascara.bannerTexto}>Escolha o serviço, o dia e o horário.</Text>
+      </FundoFoto>
+
       <View style={mascara.cartao}>
         <View style={mascara.cartaoTopo}>
           <MaterialCommunityIcons name="clock-outline" size={20} color={cores.dourado} />
@@ -286,6 +297,26 @@ const mascara = StyleSheet.create({
     maxWidth: 600,
     alignSelf: 'center',
   },
+  banner: {
+    height: 170,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: cores.borda,
+    padding: 18,
+    justifyContent: 'flex-end',
+    marginBottom: 16,
+  },
+  bannerTitulo: {
+    color: cores.creme,
+    fontSize: 26,
+    fontWeight: '800',
+    letterSpacing: -0.5,
+  },
+  bannerTexto: {
+    color: '#D8CCB8',
+    fontSize: 14,
+    marginTop: 4,
+  },
   cartao: {
     backgroundColor: cores.superficie,
     borderWidth: 1,
@@ -301,7 +332,8 @@ const mascara = StyleSheet.create({
   },
   cartaoTitulo: {
     color: cores.creme,
-    fontFamily: fontes.titulo,
+    fontWeight: '800',
+    letterSpacing: -0.5,
     fontSize: 18,
   },
   linhaSemana: {

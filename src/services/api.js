@@ -1,5 +1,6 @@
 import Constants from 'expo-constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { respostaDemo } from './demo';
 
 function enderecoDaApi() {
   if (process.env.EXPO_PUBLIC_API_URL) return process.env.EXPO_PUBLIC_API_URL;
@@ -29,6 +30,8 @@ export function quandoSessaoExpirar(funcao) {
 }
 
 export async function api(caminho, { metodo = 'GET', corpo } = {}) {
+  if (process.env.EXPO_PUBLIC_DEMO === '1') return respostaDemo(caminho, { metodo, corpo });
+
   const controle = new AbortController();
   const limite = setTimeout(() => controle.abort(), 15000);
   let resposta;
