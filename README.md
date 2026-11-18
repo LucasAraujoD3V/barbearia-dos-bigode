@@ -34,16 +34,10 @@ A versão que usa Firebase (Authentication + Firestore) está no branch `firebas
 
 ### 1. API
 
-```bash
-cd api
-npm install
-cp .env.example .env
-```
-
-No `.env`, troque `<db_password>` pela senha do usuário do banco e defina um `JWT_SECRET`. No MongoDB Atlas, em **Network Access**, libere o IP da máquina (ou `0.0.0.0/0` para testes).
+Copie `api/.env.example` para `api/.env` (ou para a raiz do projeto). No `.env`, troque `<db_password>` pela senha do usuário do banco e defina um `JWT_SECRET`. No MongoDB Atlas, em **Network Access**, libere o IP da máquina (ou `0.0.0.0/0` para testes).
 
 ```bash
-npm run dev
+npm run api
 ```
 
 A API sobe na porta 3000. Os serviços padrão da barbearia são cadastrados automaticamente na primeira execução.

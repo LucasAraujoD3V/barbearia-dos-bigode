@@ -1,4 +1,8 @@
-require('dotenv').config({ quiet: true });
+const path = require('path');
+require('dotenv').config({
+  path: [path.join(__dirname, '..', '.env'), path.join(__dirname, '..', '..', '.env')],
+  quiet: true,
+});
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
